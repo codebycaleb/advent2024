@@ -1,22 +1,24 @@
 input = File.read!("./input.txt")
 
-commands =
+commands_values =
   Regex.scan(~r/(don't|do|mul\((\d+),(\d+)\))/, input, capture: :all_but_first)
-
-part_1 =
-  commands
-  |> Enum.filter(&(length(&1) > 1))
-  |> Enum.reduce(0, fn [_, l, r], acc ->
-    acc + String.to_integer(l) * String.to_integer(r)
+  |> Enum.map(fn
+    [_, l, r] -> String.to_integer(l) * String.to_integer(r)
+    [other] -> other
   end)
 
+part_1 =
+  commands_values
+  |> Enum.filter(&is_integer/1)
+  |> Enum.sum()
+
 part_2 =
-  commands
+  commands_values
   |> Enum.reduce({0, "do"}, fn
-    ["don't"], {sum, _} -> {sum, "don't"}
-    ["do"], {sum, _} -> {sum, "do"}
+    "don't", {sum, _} -> {sum, "don't"}
+    "do", {sum, _} -> {sum, "do"}
     _, {sum, "don't"} -> {sum, "don't"}
-    [_, l, r], {sum, "do"} -> {sum + String.to_integer(l) * String.to_integer(r), "do"}
+    x, {sum, "do"} -> {sum + x, "do"}
   end)
   |> elem(0)
 
